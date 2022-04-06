@@ -1,59 +1,121 @@
-# Vue3TestingProjectDemo
+# Vue 应用测试
 
-This template should help get you started developing with Vue 3 in Vite.
+## 为什么需要测试
 
-## Recommended IDE Setup
+自动化测试通过预防回归，并鼓励将应用分解为可测试的函数、模块、类和组件，从而快速、自信地构建复杂的 Vue 应用。
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.vscode-typescript-vue-plugin).
+## Vue 应用测试类型
 
-## Type Support for `.vue` Imports in TS
+- 单元测试：检查给定函数、类或可组合函数的输入是否产生预期的输出或副作用。
+- 组件测试：检查组件是否正常挂载和渲染、是否可以与之互动，以及表现是否符合预期。这些测试比单元测试导入了更多的代码，更复杂，需要更多时间来执行。
+- 端到端测试：检查跨越多个页面的功能，并对生产构建的 Vue 应用进行实际的网络请求。这些测试通常涉及到建立一个数据库或其他后端。
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.vscode-typescript-vue-plugin) to make the TypeScript language service aware of `.vue` types.
+## 单元测试 [Vitest](https://cn.vitest.dev/)
 
-If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has also implemented a [Take Over Mode](https://github.com/johnsoncodehk/volar/discussions/471#discussioncomment-1361669) that is more performant. You can enable it by the following steps:
+编写单元测试是为了验证小的、独立的代码单元是否按预期工作。一个单元测试通常覆盖单个函数、类、可组合函数或模块。单元测试侧重于逻辑的正确性，只关注应用整体功能的一小部分。他们可能会模拟你的应用环境的很大一部分（如初始状态、复杂的类、第三方模块和网络请求）。
 
-1. Disable the built-in TypeScript Extension
-    1) Run `Extensions: Show Built-in Extensions` from VSCode's command palette
-    2) Find `TypeScript and JavaScript Language Features`, right click and select `Disable (Workspace)`
-2. Reload the VSCode window by running `Developer: Reload Window` from the command palette.
+一般来说，单元测试将捕获函数的业务逻辑和逻辑正确性的问题。
 
-## Customize configuration
+由于在`Vue3.0`中引入`可组合函数`且侧重于代码逻辑性、输入与输出，因此，在`Vue`应用中，应该更多的使用可组合函数构建代码逻辑并尽可能减少可组合函数内部触发`副作用`。
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+> **副作用**通常是指代码逻辑与`DOM`紧密耦合。在`vue`框架中，其本身利用 **响应性** 驱动视图更新，此过程即称之为 **副作用** 。
 
-## Project Setup
+单元测试通常适用于独立的业务逻辑、组件、类、模块或函数，不涉及 UI 渲染、网络请求或其他环境问题。这些通常是与 Vue 无关的纯 JavaScript/TypeScript 模块。
 
-```sh
-npm install
+**特例**：必须对 Vue 的特定功能进行单元测试。
+
+- 可组合函数
+- 组件
+
+### 可组合函数
+
+在 Vue 应用的概念中，“可组合函数”是一个利用 Vue 组合式 API 来封装和复用有状态逻辑的函数。
+
+当构建前端应用时，我们常常需要复用公共任务的逻辑。例如为了在不同地方格式化时间而抽取一个可复用的函数。这个格式化函数封装了无状态的逻辑：它在接收一些输入后立刻返回所期望的输出。
+
+#### 测试可组合函数
+
+当涉及到测试可组合函数时，我们可以根据是否依赖宿主组件实例把它们分为两类。
+
+当一个可组合函数使用以下 API 时，它依赖于一个宿主组件实例：
+
+- 生命周期钩子
+- 供给/注入
+
+1. 如果一个可组合程序只使用响应性 API，那么它可以通过直接调用并断言其返回的状态或方法来进行测试。
+
+2. 一个依赖生命周期钩子或供给/注入的可组合函数需要被包裹在一个宿主组件中才可以测试。
+
+3. 对于更复杂的可组合函数，通过使用 **组件测试** 编写针对这个包裹组件的测试。
+
+## 组件测试 [Vitest](https://cn.vitest.dev/) + [Cypress](https://docs.cypress.io/guides/component-testing/introduction#Getting-Started)
+
+在 Vue 应用中，主要用组件来构建用户界面。因此，当验证应用的行为时，组件是一个很自然的独立单元。从粒度的角度来看，组件测试位于单元测试之上，可以被认为是集成测试的一种形式。Vue 应用中大部分内容都应该由组件测试来覆盖，每个 Vue 组件都应有自己的组件测试文件。
+
+组件测试应该捕捉组件中的 prop、事件、提供的插槽、样式、CSS class 名、生命周期钩子，和其他相关的问题。
+
+> **组件测试不应该模拟子组件，而应该像用户一样，通过与组件互动来测试组件和其子组件之间的交互。像用户那样点击一个元素，而不是编程式地与组件进行交互。测试这个组件做了什么，而不是测试它是怎么做到的。**
+
+- 对于 视图 的测试：根据输入 prop 和插槽断言渲染输出是否正确。
+- 对于 交互 的测试：断言渲染的更新是否正确或触发的事件是否正确地响应了用户输入事件。
+
+### 注意事项
+
+1. 组件的最终工作是渲染正确的 DOM 输出，所以专注于 DOM 输出的测试提供了足够的正确性保证，同时更加健壮、需要的改动更少。
+
+2. 不要完全依赖快照测试。断言 HTML 字符串并不能完全说明正确性。应当编写有意图的测试。
+
+3. 如果一个方法需要测试，把它提取到一个独立的实用函数中，并为它写一个专门的单元测试。如果它不能被直截了当地抽离出来，那么对它的调用应该作为交互测试的一部分。
+
+## 端到端（E2E）测试 [Cypress](https://docs.cypress.io/)
+
+端到端测试通常会捕捉到路由、状态管理库、顶级组件（常见为 App 或 Layout）、公共资源或任何请求处理方面的问题。端到端测试不导入任何 Vue 应用的代码，而是完全依靠在真实浏览器中浏览整个页面来测试你的应用。
+
+端到端测试验证了你的应用中的许多层。可以在你的本地构建的应用中，甚至是一个预上线的环境中运行。针对预上线环境的测试不仅包括你的前端代码和静态服务器，还包括所有相关的后端服务和基础设施。
+
+## VUE应用 构建、集成测试工具
+
+Vue 官方的构建流程是基于 [Vite](https://cn.vitejs.dev/) 的，一个现代、轻量、极速的构建工具。
+
+>
+> **构建环境**
+>
+> - node version >= 14.5
+> - vite >= 2.0
+>
+
+### 使用 vite 内置 vue 模版构建
+
+创建一个启用构建工具的 Vue 项目，请在命令行中运行下面的指令：
+
+```shell
+npm init vue@latest
 ```
 
-### Compile and Hot-Reload for Development
+这一指令将会安装并执行 create-vue，它是 Vue 官方的项目脚手架工具。
 
-```sh
-npm run dev
+### 集成测试工具
+
+项目脚手架工具可选功能提示：
+
+```shell
+✔ Project name: … <your-project-name>
+✔ Add TypeScript? … No / Yes
+✔ Add JSX Support? … No / Yes
+✔ Add Vue Router for Single Page Application development? … No / Yes
+✔ Add Pinia for state management? … No / Yes
+✔ Add Vitest for Unit testing? … No / Yes
+✔ Add Cypress for both Unit and End-to-End testing? … No / Yes
+✔ Add ESLint for code quality? … No / Yes
+✔ Add Prettier for code formating? … No / Yes
 ```
 
-### Type-Check, Compile and Minify for Production
+在上述可选项中，勾选`Vitest` `Cypress`后，项目默认集成。
 
-```sh
-npm run build
-```
+在初始项目配置后，执行`install`时，若`npm`镜像源为官方而非国内镜像源，`jsdom` 和 `Cypress` 可能安装失败。
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
+推荐执行下述语句使用国内镜像源执行安装:
 
-```sh
-npm run test:unit
-```
-
-### Run End-to-End Tests with [Cypress](https://www.cypress.io/)
-
-```sh
-npm run build
-npm run test:e2e # or `npm run test:e2e:ci` for headless testing
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
+```shell
+npm i --registry https://registry.npm.taobao.org
 ```
