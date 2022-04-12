@@ -21,6 +21,10 @@ module.exports = {
   rules: {
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': ['error'],
+    '@typescript-eslint/ban-ts-comment': ['error'], // 禁止使用 // @ts-expect-error @ts-ignore @ts-nocheck @ts-check
+    // '@typescript-eslint/ban-types': ['error'], // use lower-case primitives for consistency
+    'comma-dangle': 'off',
+    '@typescript-eslint/comma-dangle': ['error'],
     'prettier/prettier': [
       'error',
       {

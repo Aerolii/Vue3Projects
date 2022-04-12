@@ -1,0 +1,10 @@
+{
+  "loginPage": {
+    "loginComp": {
+      "username": "#userName",
+      "password": "#password",
+      "submit": ".submit-btn",
+      "message": ".login-result"
+    }
+  }
+}
