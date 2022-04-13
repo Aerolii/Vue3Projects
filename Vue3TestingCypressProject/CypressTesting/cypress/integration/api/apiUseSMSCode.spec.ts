@@ -1,13 +1,4 @@
-// https://docs.cypress.io/api/introduction/api.html
-
-// describe('My First Test', () => {
-//   it('visits the app root url', () => {
-//     cy.visit('/')
-//     cy.contains('h1', 'You did it!')
-//   })
-// })
-
-import apiConfig from './api/apiConfig.json'
+import apiConfig from './apiConfig.json'
 
 describe('Application interface test', () => {
   it('短信接口测试', () => {

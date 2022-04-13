@@ -1,0 +1,5 @@
+{
+  "baseURL": "https://crowdsourcing-test.yunjichina.com.cn/api/v1/",
+  "smsCodeUrl": "mobile/sms",
+  "loginPath": "wechat/login"
+}

@@ -376,3 +376,102 @@ describe('first component test', () => {
 测试结果：
 
 ![图片](client_test_comp.png)
+
+## 端到端（E2E）测试
+
+端到端测试实际为接口测试，主要用来测试单个接口或关联接口。
+
+```json
+{
+  "baseURL": "https://crowdsourcing-test.yunjichina.com.cn/api/v1/",
+  "smsCodeUrl": "mobile/sms",
+  "loginPath": "wechat/login"
+}
+```
+
+```typescript
+import apiConfig from './apiConfig.json'
+
+export default class Tools {
+  mobile: string
+  constructor(mobile: string) {
+    this.mobile = mobile
+  }
+  getSMSCode() {
+    // const mobile = ''
+
+    cy.request({
+      url: apiConfig.baseURL + apiConfig.smsCodeUrl + '?mobile=' + this.mobile,
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .its('body')
+      .should('contain', { errcode: 0, errmsg: 'SUCCESS' })
+      .then(res => {
+        console.log('res', res)
+        cy.wrap(this.mobile).as('mobile')
+      })
+  }
+
+  login(smsCode: string) {
+    cy.request({
+      url: apiConfig.baseURL + apiConfig.loginPath,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: {
+        mobile: this.mobile,
+        smsCode: smsCode
+      }
+    }).then(res => {
+      console.log(res)
+    })
+    // .its('body')
+    // .should('contain', { errcode: 0, errmsg: 'SUCCESS' })
+  }
+}
+
+```
+
+```typescript
+import Tools from './tools'
+
+describe('Application interface test', () => {
+  const tools = new Tools('18017686876')
+  beforeEach(() => {
+    tools.getSMSCode()
+  })
+  it('短信接口测试', function () {
+    setTimeout(() => {
+      // first
+      tools.login('1785')
+    }, 10000)
+  })
+})
+```
+
+![图片](client_test_e2e.png)
+
+## 构建 mock server
+
+安装 faker 声称模拟数据`npm i -D faker`
+
+使用 node fs 模块生成 json 数据，需要配置 `package.json` `并设置 type: 'module'`
+
+使用 json-server 启动 json服务器`npm i json-server -D` 构建`resetful api` 框架
+
+启动服务：
+
+`json-server -w [filePath]`
+
+> resetful api 是一种视一切请求为资源请求的接口服务框架。
+
+### Restful API
+
+- 增加资源： post请求
+- 修改资源： put请求
+- 删除资源： delete请求
+- 查询资源： get请求
